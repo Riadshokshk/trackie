@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "993520823883",
+    "project_id": "trackie-4ff67",
+    "storage_bucket": "trackie-4ff67.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:993520823883:android:4a4ab346f969cede98a7ce",
+        "android_client_info": {
+          "package_name": "com.example.trackie_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtlJ67wHVwOC8eOFA_VUsmE7elZjVDiiE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

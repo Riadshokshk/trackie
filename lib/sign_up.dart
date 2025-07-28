@@ -1,65 +1,60 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:trackie_app/sign_up.dart';
+import 'package:trackie_app/login.dart';
+import 'package:flutter/services.dart';
+import 'firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:trackie_app/home_screen.dart';
-import 'package:flutter/services.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignUpPageState extends State<SignUpPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _login() async {
-    final String email = _emailController.text.trim();
-    final String password = _passwordController.text.trim();
+  Future<void> _signUp() async {
+   final String email = _emailController.text.trim();
+   final String password = _passwordController.text.trim();
+   final String confirmPassword = _confirmPasswordController.text.trim();
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+     _showMessage('Please fill in all fields');
+      return;
+    }
 
-    if (email.isEmpty || password.isEmpty) {
-      _showMessage('Please fill in all fields');
+    if (password != confirmPassword) {
+      _showMessage('Passwords do not match');
       return;
     }
 
     setState(() {
       _isLoading = true;
     });
-
     try {
-      await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      _showMessage('Login Successful');
+     _showMessage('Sign Up Successful');
       Navigator.pushReplacement(
-        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (context) => const HabitHomePage()),
       );
-    } on FirebaseAuthException catch (e) {
-      String message = 'Login Failed';
-      if (e.code == 'user-not-found') {
-        message = 'No user found for that email.';
-      } else if (e.code == 'wrong-password') {
-        message = 'Wrong password provided.';
-      } else if (e.code == 'invalid-email') {
-        message = 'Invalid email address.';
-      }
-      _showMessage(message);
-    } catch (e) {
-      _showMessage('Login Failed: ${e.toString()}');
+  } on FirebaseAuthException catch (e) {
+     _showMessage(e.message ?? 'An error occurred');
     } finally {
       setState(() {
         _isLoading = false;
@@ -73,18 +68,19 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: [
-              Color(0xFF5B70FC),
-              Color(0xFFF966C6),
+              const Color(0xFF5B70FC),
+              const Color(0xFFF966C6),
             ],
           ),
         ),
@@ -98,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Login to Trackie',
+                    'Sign Up to Trackie',
                     style: TextStyle(
                       fontSize: 38,
                       color: Colors.white,
@@ -106,15 +102,13 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 1),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 5),
-                    child: Text(
-                      'Please Login to continue',
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5),
+                    child: const Text(
+                      'Create a Free Account',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.white70,
-                        fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -158,17 +152,40 @@ class _LoginPageState extends State<LoginPage> {
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 border: Border(
-                                  bottom: BorderSide(color: Colors.grey),
+                                  bottom: BorderSide(color: Colors.grey[200]!),
                                 ),
                               ),
-                              child: TextField(
+                              child:  TextField(
                                 controller: _emailController,
                                 inputFormatters: [
                                   FilteringTextInputFormatter.deny(RegExp(r'\s')),
+
                                 ],
                                 keyboardType: TextInputType.emailAddress,
-                                decoration: const InputDecoration(
-                                  hintText: 'Email',
+                                decoration: InputDecoration(
+                                  hintText: 'Email or Phone Number',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(color: Colors.grey[200]!),
+                                ),
+                              ),
+                              child: TextField(
+                                controller: _passwordController,
+                                 inputFormatters: [
+                                  FilteringTextInputFormatter.deny(RegExp(r'\s')),
+
+                                ],
+                                keyboardType: TextInputType.visiblePassword,
+                                obscureText: true,
+                                decoration: InputDecoration(
+                                  hintText: 'Password',
                                   hintStyle: TextStyle(color: Colors.grey),
                                   border: InputBorder.none,
                                 ),
@@ -177,30 +194,32 @@ class _LoginPageState extends State<LoginPage> {
                             Container(
                               padding: const EdgeInsets.all(10),
                               child: TextField(
-                                controller: _passwordController,
-                                inputFormatters: [
+                                controller: _confirmPasswordController,
+                                 inputFormatters: [
                                   FilteringTextInputFormatter.deny(RegExp(r'\s')),
+
                                 ],
-                                keyboardType: TextInputType.visiblePassword,
+                                keyboardType: TextInputType.emailAddress,
                                 obscureText: true,
-                                decoration: const InputDecoration(
-                                  hintText: 'Password',
+                                decoration: InputDecoration(
+                                  hintText: 'Confirm Password',
                                   hintStyle: TextStyle(color: Colors.grey),
                                   border: InputBorder.none,
                                 ),
                               ),
-                            ),
+                            )
                           ],
                         ),
                       ),
+
                       const SizedBox(height: 40),
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(30),
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             colors: [
-                              Color(0xFF5B70FC),
-                              Color(0xFFF966C6),
+                              const Color(0xFF5B70FC),
+                              const Color(0xFFF966C6),
                             ],
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight,
@@ -219,32 +238,40 @@ class _LoginPageState extends State<LoginPage> {
                             shadowColor: Colors.transparent,
                             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(17),
+                              borderRadius: BorderRadius.circular(30),
                             ),
-                            elevation: 0,
                           ),
-                         onPressed: _isLoading ? null : _login,
-                          child: _isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : const Text(
-                                  'Login',
-                                  style: TextStyle(fontSize: 18, color: Colors.white),
-                                ),
+
+                        onPressed: _isLoading ? null : _signUp,
+
+                        child: _isLoading ? SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                             )
+                             : const Text(
+                             'Sign Up',
+                              style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => const SignUpPage()),
-                          );
-                        },
-                        child: const Text(
-                          'Don\'t have an account? Sign Up',
-                          style: TextStyle(color: Colors.blue),
+                      Container(
+                        alignment: Alignment.center,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => const LoginPage()),
+                            );
+                          },
+                          child: const Text(
+                            'Already have an account? Login',
+                            style: TextStyle(color: Colors.blue),
+                          ),
                         ),
                       ),
+
                     ],
                   ),
                 ),

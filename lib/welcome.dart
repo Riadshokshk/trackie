@@ -45,15 +45,17 @@ class WelcomePage extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: const Color(0xFFEAE6FD),
+                  foregroundColor: const Color(0xFF6983FA),
                   padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(17),
                   ),
                 ),
                 child: const Text(
                   'Get Started',
-                  style: TextStyle(fontSize: 18, color: Colors.black),
+                  style: TextStyle(fontSize: 18, color: Color(0xFF6983FA)),
                 ),
               ),
             ),
